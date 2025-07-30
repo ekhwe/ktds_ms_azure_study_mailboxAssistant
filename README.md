@@ -1,1 +1,1 @@
-# ktds_ms_azure_study
+# ktds_ms_azure_study_mailboxAssistant
