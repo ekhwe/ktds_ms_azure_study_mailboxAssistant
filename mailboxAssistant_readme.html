@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 메일함 관리 비서</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .presentation-container {
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            padding: 60px;
+            height: 100%;
+            background: white;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+
+        .slide-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .feature-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .tech-item {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+			height: 80px;
+			line-height: 45px;
+        }
+
+        .tech-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .workflow-step {
+            background: white;
+            border: 3px solid #3498db;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            box-shadow: 0 15px 35px rgba(52, 152, 219, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: #3498db;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            margin-left: 50px;
+            font-weight: bold;
+        }
+
+        .step-description {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-left: 50px;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicators {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #3498db;
+            transform: scale(1.3);
+        }
+
+        .code-preview {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-preview::before {
+            content: "Python";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ffecd2 0%, #ffdbcf 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #e67e22;
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            padding-left: 60px;
+            font-weight: 500;
+        }
+
+        .benefits-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #27ae60;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: right;
+
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide.active * {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .presentation-container {
+                width: 95%;
+                height: 90vh;
+            }
+            
+            .slide {
+                padding: 30px 20px;
+            }
+            
+            .slide-title {
+                font-size: 2rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tech-stack {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: 제목 -->
+        <div class="slide active">
+            <div class="slide-header">
+                <div class="slide-title">📬 AI 메일함 관리 비서</div>
+                <div class="slide-subtitle">인공지능 기반 스마트 이메일 분류 시스템</div>
+            </div>
+            <div class="slide-content">
+				<br><br>
+                <div class="highlight">
+                    <strong>프로젝트 목표:</strong> 사용자의 수신메일 패턴을 분석하여 메일함 및 분류 방법을 추천해주는 AI 서비스 개발
+                </div>
+				<br><br><br><br><br><br><br>
+                <div class="demo-section" style="width: 400px; float: right; font-weight: bold;">
+                    <p style="font-size: 1rem;">kt ds 전략AX사업본부 Biz솔루션담당 DWP개발팀</p>
+					<p style="font-size: 1rem;">권혁우 선임</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: 주요 기능 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-title">🎯 주요 기능</div>
+            </div>
+            <div class="slide-content">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-title">AI 기반 자동 분류</div>
+                        <div class="feature-description">gpt-4.1-mini 모델을 활용하여 사용자의 메일 내용과 발신자 패턴을 분석</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📁</div>
+                        <div class="feature-title">맞춤형 메일함 추천</div>
+                        <div class="feature-description">LLM이 분석한 결과를 기반으로 메일함과 메일 분류 방안 추천</div>
+                    </div>
+                    <div class="feature-card" style="position: fixed;top: 270px;left: 165px;">
+                        <div class="feature-icon">☁️</div>
+                        <div class="feature-title">클라우드 저장소 연동</div>
+                        <div class="feature-description">Azure Blob Storage를 활용하여 데이터 저장 및 활용</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 기술 스택 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-title">⚙️ 기술 스택</div>
+            </div>
+			<br><br><br>
+            <div class="slide-content">
+                <div class="tech-stack">
+                    <div class="tech-item">🐍 Python</div>
+                    <div class="tech-item">🎈 Streamlit</div>
+                    <div class="tech-item">🤖 Azure OpenAI gpt-4.1-mini</div>
+                    <div class="tech-item">☁️ Azure Storage</div>
+                    <div class="tech-item">📧 Email Parser</div>
+                    <div class="tech-item">🗃️ JSON</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: 시스템 워크플로우 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-title">🔄 시스템 워크플로우</div>
+            </div>
+            <div class="slide-content">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">사용자 인증</div>
+                    <div class="step-description">사번으로 사용자 확인</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">메일 데이터 업로드</div>
+                    <div class="step-description">ZIP 파일 형태의 EML 메일 데이터를 업로드하여 분석 준비</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">AI 패턴 분석</div>
+                    <div class="step-description">gpt-4.1-mini를 활용하여 메일 발신자, 제목 패턴 분석</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">메일함 추천 생성</div>
+                    <div class="step-description">분석 결과를 바탕으로 메일함 구조와 분류 규칙 제안</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-title">클라우드 저장</div>
+                    <div class="step-description">분석 결과를 Azure Storage에 저장</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 핵심 기능 상세 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-title">🔧 핵심 기능 상세</div>
+            </div>
+            <div class="slide-content">
+                <div class="code-preview">
+<pre>response = openai.chat.completions.create(
+        model="dev-gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": 
+                """당신은 메일함 분류를 도와주는 AI 비서입니다.
+                   \n사용자가 제공한 메일 데이터를 기반으로 메일함을 어떻게 분류할지 추천해주는 역할을 합니다.
+                   \n*규칙1: 응답 데이터는 반드시 json 형태로 반환해야 합니다.
+                   \n*규칙2: json 응답값에는 항상 3가지(mailBox, reason, filter) 데이터로 구성해야합니다.
+                   \n    첫번째(Key: mailBox): 추천하는 메일함들 이름을 콤마&공백((예시)메일함1, 메일함2, ...) 구분으로 나열한 문자열
+                   \n    두번째(Key: reason): 해당 메일함들을 추천하게된 상세 이유
+                   \n    세번째(Key: filter): 발신자 주소 패턴 또는 메일 제목 패턴 추출
+                   \n*규칙3: 세번째 json응답값(filter)도 json 형태로 구성해야합니다.
+                   \n    filter를 구성할 데이터는 어떤 발신자 또는 메일 제목 패턴에 의해 어떤 메일함으로 분류해야하는지를 의미합니다.
+                   \n    filter를 구성할 데이터: {"분류 인덱스 번호": {"발신자 정보 패턴 또는 메일 제목 패턴": "값", "메일함": "값"}}
+                   \n    예시1) {"0": {"fromPattern": "권혁우(test@kt.com)", "mailBox": "개인 메일함"}", ...}
+                   \n    예시2) {..., "1": {"subjectPattern": "회의", "mailBox": "회의 메일함"}", ..."""},
+            {"role": "user", "content": f"{all_eml_json}"}
+        ]
+    )</pre>
+                </div>
+				<ul class="benefits-list">
+                    <li><strong>프롬프트 엔지니어링:</strong> AI 응답 결과물을 특정 패턴으로 유도해서 받은 후 추가로 가공하여 활용</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">이전</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">다음</button>
+        </div>
+
+        <!-- Slide Indicators -->
+        <div class="slide-indicators">
+            <div class="indicator active" onclick="currentSlide(1)"></div>
+            <div class="indicator" onclick="currentSlide(2)"></div>
+            <div class="indicator" onclick="currentSlide(3)"></div>
+            <div class="indicator" onclick="currentSlide(4)"></div>
+            <div class="indicator" onclick="currentSlide(5)"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 1;
+        const totalSlides = 5;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const indicators = document.querySelectorAll('.indicator');
+            
+            if (n > totalSlides) currentSlideIndex = 1;
+            if (n < 1) currentSlideIndex = totalSlides;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            slides[currentSlideIndex - 1].classList.add('active');
+            indicators[currentSlideIndex - 1].classList.add('active');
+            
+            // Navigation button states
+            document.getElementById('prevBtn').disabled = currentSlideIndex === 1;
+            document.getElementById('nextBtn').disabled = currentSlideIndex === totalSlides;
+        }
+
+        function changeSlide(n) {
+            currentSlideIndex += n;
+            showSlide(currentSlideIndex);
+        }
+
+        function currentSlide(n) {
+            currentSlideIndex = n;
+            showSlide(currentSlideIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') changeSlide(-1);
+            if (event.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Auto-advance slides (optional)
+        // setInterval(() => {
+        //     if (currentSlideIndex < totalSlides) {
+        //         changeSlide(1);
+        //     }
+        // }, 10000);
+
+        // Initialize
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>
